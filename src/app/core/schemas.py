@@ -55,6 +55,7 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username_or_email: str
+    role_id: int
 
 
 class TokenBlacklistBase(BaseModel):

@@ -88,9 +88,10 @@ async def verify_token(token: str, db: AsyncSession) -> TokenData | None:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username_or_email: str = payload.get("sub")
+        role_id: int = payload.get("role_id")
         if username_or_email is None:
             return None
-        return TokenData(username_or_email=username_or_email)
+        return TokenData(username_or_email=username_or_email, role_id=role_id)
 
     except JWTError:
         return None

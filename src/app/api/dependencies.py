@@ -2,24 +2,20 @@ from typing import Annotated, Any
 
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.app.crud.crud_permissions import crud_permissions
+from src.app.models.role_permission import RolePermission
 
-from ..core.config import settings
+from src.app.schemas.permission import  PermissionRead
+from src.app.schemas.role_permission import RolePermissionRead
+
 from ..core.db.database import async_get_db
-from ..core.exceptions.http_exceptions import ForbiddenException, RateLimitException, UnauthorizedException
+from ..core.exceptions.http_exceptions import ForbiddenException, UnauthorizedException
 from ..core.logger import logging
 from ..core.security import oauth2_scheme, verify_token
-from ..core.utils.rate_limit import is_rate_limited
-from ..crud.crud_rate_limit import crud_rate_limits
-from ..crud.crud_tier import crud_tiers
 from ..crud.crud_users import crud_users
 from ..models.user import User
-from ..schemas.rate_limit import sanitize_path
 
 logger = logging.getLogger(__name__)
-
-DEFAULT_LIMIT = settings.DEFAULT_RATE_LIMIT_LIMIT
-DEFAULT_PERIOD = settings.DEFAULT_RATE_LIMIT_PERIOD
-
 
 async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)], db: Annotated[AsyncSession, Depends(async_get_db)]
@@ -72,30 +68,23 @@ async def get_current_superuser(current_user: Annotated[dict, Depends(get_curren
     return current_user
 
 
-async def rate_limiter(
-    request: Request, db: Annotated[AsyncSession, Depends(async_get_db)], user: User | None = Depends(get_optional_user)
-) -> None:
-    path = sanitize_path(request.url.path)
-    if user:
-        user_id = user["id"]
-        tier = await crud_tiers.get(db, id=user["tier_id"])
-        if tier:
-            rate_limit = await crud_rate_limits.get(db=db, tier_id=tier["id"], path=path)
-            if rate_limit:
-                limit, period = rate_limit["limit"], rate_limit["period"]
-            else:
-                logger.warning(
-                    f"User {user_id} with tier '{tier['name']}' has no specific rate limit for path '{path}'. \
-                        Applying default rate limit."
-                )
-                limit, period = DEFAULT_LIMIT, DEFAULT_PERIOD
-        else:
-            logger.warning(f"User {user_id} has no assigned tier. Applying default rate limit.")
-            limit, period = DEFAULT_LIMIT, DEFAULT_PERIOD
-    else:
-        user_id = request.client.host
-        limit, period = DEFAULT_LIMIT, DEFAULT_PERIOD
-
-    is_limited = await is_rate_limited(db=db, user_id=user_id, path=path, limit=limit, period=period)
-    if is_limited:
-        raise RateLimitException("Rate limit exceeded.")
+def requires_permission(permission_name: str):
+    async def permission_checker(
+        db: AsyncSession = Depends(async_get_db), 
+        user: User | None = Depends(get_optional_user)
+    ):
+        user_permission: dict = await crud_permissions.get_joined(
+            db=db,
+            join_model=RolePermission,
+            join_prefix="rp_",
+            schema_to_select=PermissionRead,
+            join_schema_to_select=RolePermissionRead,
+            join_type="inner",
+            role_id=user["role_id"], 
+            name = permission_name,  
+        ) 
+        
+        if user_permission is None:            
+            raise HTTPException(status_code=403, detail="Not enough permissions")
+       
+    return permission_checker

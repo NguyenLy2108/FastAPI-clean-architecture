@@ -113,10 +113,7 @@ class Settings(
     FirstUserSettings,
     TestSettings,
     RedisCacheSettings,
-    ClientSideCacheSettings,
-    RedisQueueSettings,
-    RedisRateLimiterSettings,
-    DefaultRateLimitSettings,
+    ClientSideCacheSettings,   
     EnvironmentSettings,
 ):
     pass

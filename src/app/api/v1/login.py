@@ -31,9 +31,12 @@ async def login_for_access_token(
         raise UnauthorizedException("Wrong username, email or password.")
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = await create_access_token(data={"sub": user["username"]}, expires_delta=access_token_expires)
+    access_token = await create_access_token(
+        data={"sub": user["username"], "role_id": user["role_id"]}, 
+        expires_delta=access_token_expires
+    )
 
-    refresh_token = await create_refresh_token(data={"sub": user["username"]})
+    refresh_token = await create_refresh_token(data={"sub": user["username"], "role_id": user["role_id"]})
     max_age = settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
 
     response.set_cookie(
@@ -53,5 +56,5 @@ async def refresh_access_token(request: Request, db: AsyncSession = Depends(asyn
     if not user_data:
         raise UnauthorizedException("Invalid refresh token.")
 
-    new_access_token = await create_access_token(data={"sub": user_data.username_or_email})
+    new_access_token = await create_access_token(data={"sub": user_data.username_or_email, "role_id": user_data.role_id})
     return {"access_token": new_access_token, "token_type": "bearer"}

@@ -25,4 +25,5 @@ class User(Base):
     is_deleted: Mapped[bool] = mapped_column(default=False, index=True)
     is_superuser: Mapped[bool] = mapped_column(default=False)
 
-    tier_id: Mapped[int | None] = mapped_column(ForeignKey("tier.id"), index=True, default=None, init=False)
+    # tier_id: Mapped[int | None] = mapped_column(ForeignKey("tier.id"), index=True, default=None, init=False)
+    role_id: Mapped[int | None] = mapped_column(ForeignKey("role.id"), index=True, default=None, init=False)
