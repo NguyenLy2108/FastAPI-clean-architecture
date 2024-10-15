@@ -2,15 +2,14 @@
  <a href="">
       <img src="https://blog.cleancoder.com/uncle-bob/images/2012-08-13-the-clean-architecture/CleanArchitecture.jpg" alt="Clean Architecture">
   </a>
-
-  Frameworks & Drivers: View, UI, ...
-  Interface Adapters: 
-    - src/app/main.py => core/setup.py: set up connection to Redis, PostgreSQL
-    - app/api/ => Analyze, build routers (controlers)
-  Application Business Rules: 
-    - app/crud: build business logic 
-  Enterprise Business Rules: 
-    - app/schemas, app/models: Create the new entities and relationships
+Frameworks & Drivers: View, UI, ...
+Interface Adapters
+- src/app/main.py => core/setup.py: set up connection to Redis, PostgreSQL
+- app/api/ => Analyze, build routers (controlers)
+Application Business Rules: 
+- app/crud: build business logic 
+Enterprise Business Rules: 
+- app/schemas, app/models: Create the new entities and relationships
     
 # 2. Project Structure
 
