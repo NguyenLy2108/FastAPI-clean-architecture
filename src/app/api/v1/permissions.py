@@ -3,11 +3,11 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, Request
 from fastcrud.paginated import PaginatedListResponse, compute_offset, paginated_response
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.app.crud.crud_roles import crud_roles
-from src.app.models.role_permission import RolePermission
+from ...crud.crud_roles import crud_roles
+from ...models.role_permission import RolePermission
 
-from src.app.schemas.role import Role, RoleRead
-from src.app.schemas.role_permission import RolePermissionRead
+from ...schemas.role import RoleRead
+from ...schemas.role_permission import RolePermissionRead
 
 from ...api.dependencies import get_current_superuser
 from ...core.db.database import async_get_db

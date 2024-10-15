@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends, Request
 from fastcrud.paginated import PaginatedListResponse, compute_offset, paginated_response
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.app.models.role import Role
-from src.app.schemas.role import RoleRead
+from ...models.role import Role
+from ...schemas.role import RoleRead
 
 from ...api.dependencies import get_current_superuser, get_current_user
 from ...core.db.database import async_get_db

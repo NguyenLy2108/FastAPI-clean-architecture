@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.app.schemas.role import RoleRead
+from ...schemas.role import RoleRead
 
 from ...api.dependencies import get_current_superuser
 from ...core.db.database import async_get_db

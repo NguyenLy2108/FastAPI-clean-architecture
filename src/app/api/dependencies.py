@@ -2,11 +2,11 @@ from typing import Annotated, Any
 
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.app.crud.crud_permissions import crud_permissions
-from src.app.models.role_permission import RolePermission
+from ..crud.crud_permissions import crud_permissions
+from ..models.role_permission import RolePermission
 
-from src.app.schemas.permission import  PermissionRead
-from src.app.schemas.role_permission import RolePermissionRead
+from ..schemas.permission import  PermissionRead
+from ..schemas.role_permission import RolePermissionRead
 
 from ..core.db.database import async_get_db
 from ..core.exceptions.http_exceptions import ForbiddenException, UnauthorizedException
