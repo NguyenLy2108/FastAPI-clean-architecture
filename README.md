@@ -1,18 +1,50 @@
-# 1. Clean Architecture System Design
+<h1 align="center"> Clean architecture with FastAPI</h1>
  <a href="">
       <img src="https://blog.cleancoder.com/uncle-bob/images/2012-08-13-the-clean-architecture/CleanArchitecture.jpg" alt="Clean Architecture">
   </a>
 
+This repo creates an extendable async API using FastAPI, Pydantic V2, SQLAlchemy 2.0 and PostgreSQL:
+
+- [`FastAPI`](https://fastapi.tiangolo.com): modern Python web framework for building APIs
+- [`Pydantic V2`](https://docs.pydantic.dev/2.4/): the most widely used data Python validation library, rewritten in Rust [`(5x-50x faster)`](https://docs.pydantic.dev/latest/blog/pydantic-v2-alpha/)
+- [`SQLAlchemy 2.0`](https://docs.sqlalchemy.org/en/20/changelog/whatsnew_20.html): Python SQL toolkit and Object Relational Mapper
+- [`PostgreSQL`](https://www.postgresql.org): The World's Most Advanced Open Source Relational Database
+- [`Redis`](https://redis.io): Open source, in-memory data store used by millions as a cache, message broker and more.
+- [`Docker Compose`](https://docs.docker.com/compose/) With a single command, create and start all the services from your configuration.
+- [`NGINX`](https://nginx.org/en/) High-performance low resource consumption web server used for Reverse Proxy and Load Balancing.
+
+# 1. Contents
+1. [Contents](#1-contents)
+1. [Project Structure with Clean Architecture](#2-project-tructure)
+1. [Features](#3-features)
+1. [Prerequisites](#4-prerequisites)
+   1. [Clone repo](#41-clone-repo)
+   1. [Environment Variables (.env)](#42-environment-variables-env)
+   1. [Docker Compose](#43-docker-compose-preferred)
+   1. [From Scratch](#44-from-scratch)
+1. [Usage](#5-usage)
+   1. [Docker Compose](#51-docker-compose)
+   1. [From Scratch](#52-from-scratch)
+      1. [Install Dependencis](#521-dependencies)
+      1. [Running PostgreSQL, Redis With Docker](#522-running-postgresql-redis-with-docker)    
+      1. [Running the API](#523-running-the-api)  
+   1. [Database Migrations](#53-database-migrations)
+
+# 2. Project Structure with Clean Architecture.
 _Frameworks & Drivers: View, UI, ..._
+
 _Interface Adapters:_ 
+
 - src/app/main.py => core/setup.py: set up connection to Redis, PostgreSQL
 - app/api/ => Analyze, build routers (controlers)
-_Application Business Rules:_ 
+_Application Business Rules:_
+
 - app/crud: build business logic 
 _Enterprise Business Rules:_ 
+
 - app/schemas, app/models: Create the new entities and relationships
     
-# 2. Project Structure
+_Project Structure_
 
 ```sh
 .
@@ -185,36 +217,182 @@ def requires_permission(permission_name: str):
     return permission_checker
 ```
 
-# 4. Run
-Create a .env file inside src directory:
-## 4.1 Docker Compose
+
+# 4. Prerequisites
+## 4.1 Clone repo:
 ```sh
-docker compose up
+git clone https://github.com/NguyenLy2108/FastAPI-clean-architecture.git
 ```
-## 4.2 From Scratch
-Install poetry:
+## 4.2 Environment variables (.env)
+Create a .env file inside src directory.
+
+_Create the following app settings variables_
+```
+# ------------- app settings -------------
+APP_NAME="Your app name here"
+APP_DESCRIPTION="Your app description here"
+APP_VERSION="0.1"
+CONTACT_NAME="Your name"
+CONTACT_EMAIL="Your email"
+LICENSE_NAME="The license you picked"
+```
+
+_For the database create:_
+
+```
+# ------------- database -------------
+POSTGRES_USER="your_postgres_user"
+POSTGRES_PASSWORD="your_password"
+POSTGRES_SERVER="your_server" # default "localhost", if using docker compose you should use "db"
+POSTGRES_PORT=5432 # default "5432", if using docker compose you should use "5432"
+POSTGRES_DB="your_db"
+```
+_For redis caching:_
+
+```
+# ------------- redis cache-------------
+REDIS_CACHE_HOST="your_host" # default "localhost", if using docker compose you should use "redis"
+REDIS_CACHE_PORT=6379 # default "6379", if using docker compose you should use "6379"
+```
+_Secret key to encrypt token:_
+```
+# ------------- encrypt -------------
+SECRET_KEY= # result of openssl rand -hex 32
+ALGORITHM= # pick an algorithm, default HS256
+ACCESS_TOKEN_EXPIRE_MINUTES= # minutes until token expires, default 30
+REFRESH_TOKEN_EXPIRE_DAYS= # days until token expires, default 7
+```
+## 4.3 Docker Compose
+
+_Install docker, docker compose if you don't have it yet_[Click here](https://docs.docker.com/)
+
+_Check docker, docker-compose version on terminal_
+```sh
+docker --version
+docker-compose --version
+```
+
+## 4.4 From Scartch
+_Install poetry:_
 
 ```sh
 pip install poetry
 ```
-Install packages:
+
+_**If you don't have database yet (postgre or redis)? you can create with docker.**_
+
+_Ensure you have docker, Install docker if you don't have it yet_
+
+- Create and run postgre with docker:
+
+```sh
+docker pull postgres
+```
+
+And pick the port, name, user and password, replacing the fields:
+
+```sh
+docker run -d \
+    -p {PORT}:{PORT} \
+    --name {NAME} \
+    -e POSTGRES_PASSWORD={PASSWORD} \
+    -e POSTGRES_USER={USER} \
+    postgres
+```
+
+Such as:
+
+```sh
+docker run -d \
+    -p 5432:5432 \
+    --name postgres \
+    -e POSTGRES_PASSWORD=1234 \
+    -e POSTGRES_USER=postgres \
+    postgres
+```
+
+- Create and run redis with docker:
+```sh
+docker pull redis:alpine
+```
+
+And pick the name and port, replacing the fields:
+
+```sh
+docker run -d \
+  --name {NAME}  \
+  -p {PORT}:{PORT} \
+redis:alpine
+```
+
+Such as
+
+```sh
+docker run -d \
+  --name redis  \
+  -p 6379:6379 \
+redis:alpine
+```
+
+# 5. Usage
+
+## 5.1 Docker Compose
+If your setup is done. You just need to ensure that when you run (while in the base folder):
+
+```sh
+docker compose up
+```
+
+And get the following outputs:
+
+```sh
+fastapi-clean-architecture-api-1    | INFO:     Will watch for changes in these directories: ['/code']
+fastapi-clean-architecture-api-1    | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)   
+fastapi-clean-architecture-api-1    | INFO:     Started reloader process [1] using StatReload
+fastapi-clean-architecture-api-1    | INFO:     Started server process [8]
+fastapi-clean-architecture-api-1    | INFO:     Waiting for application startup.
+fastapi-clean-architecture-api-1    | INFO:     Application startup complete.
+```
+You can click (http://localhost/docs) to see swagger_documentation
+## 5.2 From Scratch
+### 5.2.1 Install dependencies:
 
 ```sh
 poetry install
 ```
-Run API:
+
+### 5.2.2 Running PostgreSQL and Redis with Docker.
+_Check if the postgre database and redis are running; if not, please start them with Docker and image name._
+
+```sh
+docker run -t <image_name> .
+```
+### 5.2.3 Running the API:
 
 ```sh
 poetry run uvicorn src.app.main:app --reload
 ```
-## 4.3 Use pip
-Install packages:
-
+And get the following outputs on terminal:
 ```sh
-pip install -r requirement.txt
+PS E:\Visualcode\FastAPI-clean-architecture> poetry run uvicorn src.app.main:app --reload
+INFO:     Will watch for changes in these directories: ['E:\\Visualcode\\FastAPI-clean-architecture']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [25320] using StatReload
 ```
-Run API:
+And you can click (http://127.0.0.1:8000) to see swagger_documentation
+
+## 5.3 Database Migrations
+
+To create the tables if you did not create the endpoints, ensure that you import the models in src/app/models/__init__.py. This step is crucial to create the new tables.
+
+While in the `src` folder, run Alembic migrations:
 
 ```sh
-python -m uvicorn src.app.main:app --reload
+poetry run alembic revision --autogenerate
+```
+
+And to apply the migration
+
+```sh
+poetry run alembic upgrade head
 ```

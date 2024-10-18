@@ -106,9 +106,7 @@ def create_application(
         - AppSettings: Configures basic app metadata like name, description, contact, and license info.
         - DatabaseSettings: Adds event handlers for initializing database tables during startup.
         - RedisCacheSettings: Sets up event handlers for creating and closing a Redis cache pool.
-        - ClientSideCacheSettings: Integrates middleware for client-side caching.
-        - RedisQueueSettings: Sets up event handlers for creating and closing a Redis queue pool.
-        - RedisRateLimiterSettings: Sets up event handlers for creating and closing a Redis rate limiter pool.
+        - ClientSideCacheSettings: Integrates middleware for client-side caching.        
         - EnvironmentSettings: Conditionally sets documentation URLs and integrates custom routes for API documentation
           based on the environment type.
 

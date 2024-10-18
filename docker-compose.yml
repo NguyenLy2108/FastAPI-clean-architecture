@@ -1,22 +1,38 @@
-version: '2.1'
+version: '3.8'
+
+networks:
+  api-network:
+  db-network:
+  redis-network:
+  nginx-network:
 
 services:
-  web:
+  api:
     build: 
       context: .
       dockerfile: Dockerfile    
     env_file:
-      - ./src/.env   
+      - ./src/.env  
     expose:
       - "8000"
     depends_on:
-      db: 
-        condition: service_completed_successfully
-      redis: 
-        condition: service_completed_successfully
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     volumes:
       - ./src/app:/code/app
       - ./src/.env:/code/.env
+    networks:
+      - api-network
+      - db-network
+      - redis-network
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8000/docs"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
   db:
     image: postgres:13
     env_file:
@@ -25,6 +41,14 @@ services:
       - postgres-data:/var/lib/postgresql/data
     expose:
       - "5432"
+    networks:
+      - db-network
+      - api-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"] 
+      interval: 10s
+      timeout: 10s
+      retries: 5
 
   redis:
     image: redis:alpine
@@ -32,6 +56,14 @@ services:
       - redis-data:/data
     expose:
       - "6379"
+    networks:
+      - redis-network
+      - api-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
   
   nginx:
     image: nginx:latest
@@ -40,7 +72,11 @@ services:
     volumes:
       - ./default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
-      - web
+      api:
+        condition: service_healthy
+    networks:
+      - nginx-network
+      - api-network
 
 volumes:
   postgres-data:
