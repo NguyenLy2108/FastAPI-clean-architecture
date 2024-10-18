@@ -37,9 +37,11 @@ _Interface Adapters:_
 
 - src/app/main.py => core/setup.py: set up connection to Redis, PostgreSQL
 - app/api/ => Analyze, build routers (controlers)
+  
 _Application Business Rules:_
 
-- app/crud: build business logic 
+- app/crud: build business logic
+  
 _Enterprise Business Rules:_ 
 
 - app/schemas, app/models: Create the new entities and relationships
