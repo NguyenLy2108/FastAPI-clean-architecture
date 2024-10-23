@@ -398,3 +398,14 @@ And to apply the migration
 ```sh
 poetry run alembic upgrade head
 ```
+If you want to stop tables from being created every time you run the api, you should disable this here:
+```sh
+# app/main.py
+
+from .api import router
+from .core.config import settings
+from .core.setup import create_application
+
+# create_tables_on_start defaults to True
+app = create_application(router=router, settings=settings, create_tables_on_start=False)
+```
